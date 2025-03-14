@@ -55,9 +55,9 @@ class Config:
     CONTEXT_COUNT: int = 3
     DECISIONS = ["yes", "no"]
     SAMPLE_SIZE: int = 2000
-    TEST_SIZE: int = 1000
-    TRAIN_SIZE: int = 2000
-    VAL_SIZE: int = 500
+    TEST_SIZE: int = 2000
+    TRAIN_SIZE: int = 4000
+    VAL_SIZE: int = 100
 
     # Embedding
     NORMALIZE: bool = True
