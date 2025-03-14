@@ -5,3 +5,4 @@ datasets
 transformers
 torch
 scikit-learn
+matplotlib
