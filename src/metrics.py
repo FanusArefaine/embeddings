@@ -293,7 +293,7 @@ def evaluate_all_metrics(list_of_retrieved, list_of_relevant, k=None):
         "Precision@k": float(np.mean(prec_scores)) if prec_scores else 0.0,
         "Recall@k": float(np.mean(rec_scores)) if rec_scores else 0.0,
         "F1@k": float(np.mean(f1_scores)) if f1_scores else 0.0,
-        "AveragePrecision": float(np.mean(ap_scores)) if ap_scores else 0.0,
+        "MeanAveragePrecision": float(np.mean(ap_scores)) if ap_scores else 0.0,
         "MRR": float(np.mean(mrr_scores)) if mrr_scores else 0.0,
         "R-Precision": float(np.mean(rp_scores)) if rp_scores else 0.0,
         "nDCG@k": float(np.mean(ndcg_scores)) if ndcg_scores else 0.0
