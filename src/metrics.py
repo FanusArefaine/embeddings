@@ -233,3 +233,69 @@ def compute_ndcg(retrieved_indices, relevance_scores, k=None):
         return 0.0
 
     return dcg / idcg
+
+
+def evaluate_all_metrics(list_of_retrieved, list_of_relevant, k=None):
+    """
+    Evaluates multiple retrieval metrics across all queries.
+    
+    Args:
+        list_of_retrieved (list[list[int]]):
+            For each query, a ranked list of doc indices retrieved.
+        list_of_relevant (list[set[int]]):
+            For each query, a set of relevant doc indices.
+        k (int, optional):
+            The cutoff rank for Precision/Recall/F1@k, nDCG@k, etc.
+            If None, it defaults to the length of the first retrieved list.
+    
+    Returns:
+        dict: A dictionary mapping metric_name -> float value (mean across queries).
+    """
+    from src.metrics import (
+        compute_precision_at_k,
+        compute_recall_at_k,
+        compute_f1_at_k,
+        compute_average_precision,
+        compute_mrr,
+        compute_r_precision,
+        compute_ndcg
+    )
+
+    # Default k if not provided
+    if k is None:
+        k = len(list_of_retrieved[0]) if list_of_retrieved else 0
+
+    prec_scores, rec_scores, f1_scores = [], [], []
+    ap_scores, mrr_scores, rp_scores = [], [], []
+    ndcg_scores = []
+
+    for retrieved, relevant in zip(list_of_retrieved, list_of_relevant):
+        prec = compute_precision_at_k(retrieved, relevant, k)
+        rec  = compute_recall_at_k(retrieved, relevant, k)
+        f1   = compute_f1_at_k(retrieved, relevant, k)
+        ap   = compute_average_precision(retrieved, relevant)
+        rr   = compute_mrr(retrieved, relevant)
+        rp   = compute_r_precision(retrieved, relevant)
+
+        # For nDCG, assume binary: doc_id -> 1 if in 'relevant', else 0
+        relevance_scores = {doc_id: 1.0 if doc_id in relevant else 0.0 for doc_id in retrieved}
+        ndcg_val = compute_ndcg(retrieved, relevance_scores, k=k)
+
+        prec_scores.append(prec)
+        rec_scores.append(rec)
+        f1_scores.append(f1)
+        ap_scores.append(ap)
+        mrr_scores.append(rr)
+        rp_scores.append(rp)
+        ndcg_scores.append(ndcg_val)
+
+    results = {
+        "Precision@k": float(np.mean(prec_scores)) if prec_scores else 0.0,
+        "Recall@k": float(np.mean(rec_scores)) if rec_scores else 0.0,
+        "F1@k": float(np.mean(f1_scores)) if f1_scores else 0.0,
+        "AveragePrecision": float(np.mean(ap_scores)) if ap_scores else 0.0,
+        "MRR": float(np.mean(mrr_scores)) if mrr_scores else 0.0,
+        "R-Precision": float(np.mean(rp_scores)) if rp_scores else 0.0,
+        "nDCG@k": float(np.mean(ndcg_scores)) if ndcg_scores else 0.0
+    }
+    return results
